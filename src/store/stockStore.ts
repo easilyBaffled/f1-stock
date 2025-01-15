@@ -24,8 +24,8 @@ export const useStockStore = create<StockState>((set, get) => ({
   setUpdateInterval: (interval: number) => set({ updateInterval: interval }),
 
   updateStockPrices: () => {
-    if (get().isPaused) return;
-    
+    // Only check isPaused when the update is triggered by the interval
+    // Manual updates should work regardless of the paused state
     set((state) => ({
       stocks: state.stocks.map((stock) => ({
         ...stock,
