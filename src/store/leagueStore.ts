@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { BaseStrategy } from '../trading/BaseStrategy';
 import { ValueStrategy } from '../trading/strategies/ValueStrategy';
 import { MomentumStrategy } from '../trading/strategies/MomentumStrategy';
+import { useStockStore } from './stockStore';
 
 export interface MemberHolding {
   stockId: string;

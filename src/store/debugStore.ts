@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useStockStore } from './stockStore';
 
 interface DebugState {
   isDebugMode: boolean;
