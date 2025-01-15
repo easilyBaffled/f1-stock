@@ -1,10 +1,22 @@
 import { create } from 'zustand';
 import { Stock, mockStocks, generateNewPrice } from '../utils/stockData';
+import { useDebugStore } from './debugStore';
+import { useLeagueStore } from './leagueStore';
+
+export interface Transaction {
+  id: string;
+  stockId: string;
+  type: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  timestamp: number;
+}
 
 interface StockState {
   stocks: Stock[];
   walletBalance: number;
-  portfolio: { [key: string]: number }; // stockId -> quantity
+  portfolio: { [key: string]: number };
+  transactions: Transaction[];
   updateInterval: number;
   isPaused: boolean;
   setUpdateInterval: (interval: number) => void;
@@ -16,9 +28,10 @@ interface StockState {
 
 export const useStockStore = create<StockState>((set, get) => ({
   stocks: mockStocks,
-  walletBalance: 100000, // Start with $100,000
+  walletBalance: 100000,
   portfolio: {},
-  updateInterval: 60000, // 1 minute default
+  transactions: [],
+  updateInterval: 60000,
   isPaused: false,
 
   setUpdateInterval: (interval: number) => set({ updateInterval: interval }),
@@ -33,6 +46,9 @@ export const useStockStore = create<StockState>((set, get) => ({
         price: generateNewPrice(stock.price),
       })),
     }));
+    
+    // Update AI trader portfolios after price changes
+    useLeagueStore.getState().updateMemberPortfolios();
   },
 
   buyStock: (stockId: string, quantity: number) => {
@@ -46,6 +62,15 @@ export const useStockStore = create<StockState>((set, get) => ({
     if (totalCost > state.walletBalance) return false;
     if (quantity > stock.availableShares) return false;
     
+    const transaction: Transaction = {
+      id: crypto.randomUUID(),
+      stockId,
+      type: 'buy',
+      quantity,
+      price: stock.price,
+      timestamp: Date.now(),
+    };
+    
     set((state) => ({
       walletBalance: state.walletBalance - totalCost,
       portfolio: {
@@ -57,6 +82,7 @@ export const useStockStore = create<StockState>((set, get) => ({
           ? { ...s, availableShares: s.availableShares - quantity }
           : s
       ),
+      transactions: [...state.transactions, transaction],
     }));
     
     return true;
@@ -71,6 +97,15 @@ export const useStockStore = create<StockState>((set, get) => ({
     
     const totalValue = stock.price * quantity;
     
+    const transaction: Transaction = {
+      id: crypto.randomUUID(),
+      stockId,
+      type: 'sell',
+      quantity,
+      price: stock.price,
+      timestamp: Date.now(),
+    };
+    
     set((state) => ({
       walletBalance: state.walletBalance + totalValue,
       portfolio: {
@@ -82,6 +117,7 @@ export const useStockStore = create<StockState>((set, get) => ({
           ? { ...s, availableShares: s.availableShares + quantity }
           : s
       ),
+      transactions: [...state.transactions, transaction],
     }));
     
     return true;

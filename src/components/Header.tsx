@@ -1,5 +1,6 @@
 import { formatCurrency } from "@/utils/formatters";
 import { useStockStore } from "@/store/stockStore";
+import { useDebugStore } from "@/store/debugStore";
 import {
   Select,
   SelectContent,
@@ -14,11 +15,15 @@ export function Header() {
   const { 
     walletBalance, 
     updateInterval, 
-    setUpdateInterval, 
-    isPaused, 
-    setPaused, 
+    setUpdateInterval,
     updateStockPrices 
   } = useStockStore();
+  
+  const {
+    isPaused,
+    togglePause,
+    stepForward
+  } = useDebugStore();
 
   const calculatePortfolioValue = () => {
     const { stocks, portfolio } = useStockStore.getState();
@@ -30,7 +35,7 @@ export function Header() {
 
   const handleManualUpdate = () => {
     if (isPaused) {
-      updateStockPrices();
+      stepForward();
     }
   };
 
@@ -70,7 +75,7 @@ export function Header() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setPaused(!isPaused)}
+                onClick={togglePause}
                 className="h-8 w-8"
               >
                 {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}

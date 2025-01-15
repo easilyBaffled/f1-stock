@@ -3,10 +3,12 @@ import { Header } from "@/components/Header";
 import { StockCard } from "@/components/StockCard";
 import { TransactionModal } from "@/components/TransactionModal";
 import { useStockStore } from "@/store/stockStore";
+import { useDebugStore } from "@/store/debugStore";
 import { Stock } from "@/utils/stockData";
 
 const Index = () => {
-  const { stocks, updateStockPrices, updateInterval, isPaused } = useStockStore();
+  const { stocks, updateStockPrices, updateInterval } = useStockStore();
+  const { isPaused } = useDebugStore();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [transactionType, setTransactionType] = useState<"buy" | "sell">("buy");
 
