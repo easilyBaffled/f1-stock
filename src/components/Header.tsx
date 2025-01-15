@@ -7,9 +7,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Pause, Play, Forward } from "lucide-react";
 
 export function Header() {
-  const { walletBalance, updateInterval, setUpdateInterval } = useStockStore();
+  const { 
+    walletBalance, 
+    updateInterval, 
+    setUpdateInterval, 
+    isPaused, 
+    setPaused, 
+    updateStockPrices 
+  } = useStockStore();
 
   const calculatePortfolioValue = () => {
     const { stocks, portfolio } = useStockStore.getState();
@@ -17,6 +26,12 @@ export function Header() {
       const stock = stocks.find((s) => s.id === stockId);
       return total + (stock?.price || 0) * quantity;
     }, 0);
+  };
+
+  const handleManualUpdate = () => {
+    if (isPaused) {
+      updateStockPrices();
+    }
   };
 
   return (
@@ -51,6 +66,25 @@ export function Header() {
                 <SelectItem value="300000">5 minutes</SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPaused(!isPaused)}
+                className="h-8 w-8"
+              >
+                {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleManualUpdate}
+                disabled={!isPaused}
+                className="h-8 w-8"
+              >
+                <Forward className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -6,10 +6,12 @@ interface StockState {
   walletBalance: number;
   portfolio: { [key: string]: number }; // stockId -> quantity
   updateInterval: number;
+  isPaused: boolean;
   setUpdateInterval: (interval: number) => void;
   updateStockPrices: () => void;
   buyStock: (stockId: string, quantity: number) => boolean;
   sellStock: (stockId: string, quantity: number) => boolean;
+  setPaused: (paused: boolean) => void;
 }
 
 export const useStockStore = create<StockState>((set, get) => ({
@@ -17,10 +19,13 @@ export const useStockStore = create<StockState>((set, get) => ({
   walletBalance: 100000, // Start with $100,000
   portfolio: {},
   updateInterval: 60000, // 1 minute default
+  isPaused: false,
 
   setUpdateInterval: (interval: number) => set({ updateInterval: interval }),
 
   updateStockPrices: () => {
+    if (get().isPaused) return;
+    
     set((state) => ({
       stocks: state.stocks.map((stock) => ({
         ...stock,
@@ -81,4 +86,6 @@ export const useStockStore = create<StockState>((set, get) => ({
     
     return true;
   },
+
+  setPaused: (paused: boolean) => set({ isPaused: paused }),
 }));

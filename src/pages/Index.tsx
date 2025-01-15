@@ -6,14 +6,16 @@ import { useStockStore } from "@/store/stockStore";
 import { Stock } from "@/utils/stockData";
 
 const Index = () => {
-  const { stocks, updateStockPrices, updateInterval } = useStockStore();
+  const { stocks, updateStockPrices, updateInterval, isPaused } = useStockStore();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [transactionType, setTransactionType] = useState<"buy" | "sell">("buy");
 
   useEffect(() => {
+    if (isPaused) return;
+    
     const interval = setInterval(updateStockPrices, updateInterval);
     return () => clearInterval(interval);
-  }, [updateInterval, updateStockPrices]);
+  }, [updateInterval, updateStockPrices, isPaused]);
 
   const handleTransaction = (stock: Stock, type: "buy" | "sell") => {
     setSelectedStock(stock);
