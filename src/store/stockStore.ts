@@ -45,6 +45,9 @@ export const useStockStore = create<StockState>((set, get) => ({
       })),
     }));
     
+    // Execute AI trades after price updates
+    useLeagueStore.getState().executeTrades();
+    // Update portfolio values
     useLeagueStore.getState().updateMemberPortfolios();
   },
 

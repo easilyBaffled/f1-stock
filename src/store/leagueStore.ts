@@ -22,10 +22,12 @@ interface LeagueState {
   members: LeagueMember[];
   updateMemberPortfolios: () => void;
   addMember: (member: Omit<LeagueMember, 'strategy' | 'portfolioValue' | 'holdings'>) => void;
+  executeTrades: () => void;
 }
 
 export const useLeagueStore = create<LeagueState>((set, get) => ({
   members: [],
+  
   updateMemberPortfolios: () => {
     const { stocks } = useStockStore.getState();
     set((state) => ({
@@ -38,6 +40,7 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
       }),
     }));
   },
+  
   addMember: (member) => {
     const strategy = member.algorithm === 'Conservative' 
       ? new ValueStrategy()
@@ -52,4 +55,45 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
       }],
     }));
   },
+  
+  executeTrades: () => {
+    const { stocks, buyStock, sellStock } = useStockStore.getState();
+    const { members } = get();
+    
+    members.forEach((member) => {
+      stocks.forEach((stock) => {
+        const currentHolding = member.holdings.find(h => h.stockId === stock.id)?.quantity || 0;
+        const decision = member.strategy.analyze(stock, member.portfolioValue, currentHolding);
+        
+        if (decision.action === 'buy' && decision.quantity) {
+          buyStock(stock.id, decision.quantity);
+        } else if (decision.action === 'sell' && decision.quantity) {
+          sellStock(stock.id, decision.quantity);
+        }
+      });
+    });
+  },
 }));
+
+// Initialize some AI traders
+const initializeAITraders = () => {
+  const store = useLeagueStore.getState();
+  
+  const aiTraders = [
+    {
+      id: '1',
+      username: 'ValueBot',
+      algorithm: 'Conservative' as const,
+    },
+    {
+      id: '2',
+      username: 'MomentumBot',
+      algorithm: 'Aggressive' as const,
+    },
+  ];
+  
+  aiTraders.forEach(trader => store.addMember(trader));
+};
+
+// Call this immediately to set up initial AI traders
+initializeAITraders();
