@@ -6,6 +6,7 @@ import { useStockStore } from "@/store/stockStore";
 import { useDebugStore } from "@/store/debugStore";
 import { Stock } from "@/utils/stockData";
 import { PortfolioSection } from "@/components/PortfolioSection";
+import { LeagueStandings } from "@/components/LeagueStandings";
 import { Separator } from "@/components/ui/separator";
 
 const Index = () => {
@@ -34,7 +35,14 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container py-6 space-y-8">
-        <PortfolioSection />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <PortfolioSection />
+          </div>
+          <div>
+            <LeagueStandings />
+          </div>
+        </div>
         <Separator className="my-8" />
         <div>
           <h2 className="text-2xl font-bold mb-4">Market</h2>
