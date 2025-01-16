@@ -41,10 +41,10 @@ export const useStockStore = create<StockState>((set, get) => ({
         ...stock,
         previousPrice: stock.price,
         price: generateNewPrice(stock.price),
+        priceHistory: [...stock.priceHistory, { timestamp: Date.now(), price: stock.price }].slice(-30),
       })),
     }));
     
-    // Update AI trader portfolios after price changes
     useLeagueStore.getState().updateMemberPortfolios();
   },
 

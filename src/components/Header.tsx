@@ -16,7 +16,8 @@ export function Header() {
     walletBalance, 
     updateInterval, 
     setUpdateInterval,
-    updateStockPrices 
+    stocks,
+    portfolio
   } = useStockStore();
   
   const {
@@ -26,7 +27,6 @@ export function Header() {
   } = useDebugStore();
 
   const calculatePortfolioValue = () => {
-    const { stocks, portfolio } = useStockStore.getState();
     return Object.entries(portfolio).reduce((total, [stockId, quantity]) => {
       const stock = stocks.find((s) => s.id === stockId);
       return total + (stock?.price || 0) * quantity;
