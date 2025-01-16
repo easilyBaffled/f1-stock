@@ -1,16 +1,30 @@
+import { useState } from "react";
 import { StockCard } from "@/components/StockCard";
 import { useStockStore } from "@/store/stockStore";
 import { Card } from "./ui/card";
 import { formatCurrency } from "@/utils/formatters";
+import { Stock } from "@/utils/stockData";
+import { TransactionModal } from "@/components/TransactionModal";
 
 export function PortfolioSection() {
   const { stocks, portfolio, walletBalance } = useStockStore();
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+  const [transactionType, setTransactionType] = useState<"buy" | "sell">("buy");
   
   const ownedStocks = stocks.filter((stock) => (portfolio[stock.id] || 0) > 0);
   
   const portfolioValue = ownedStocks.reduce((total, stock) => {
     return total + stock.price * (portfolio[stock.id] || 0);
   }, 0);
+
+  const handleTransaction = (stock: Stock, type: "buy" | "sell") => {
+    setSelectedStock(stock);
+    setTransactionType(type);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedStock(null);
+  };
 
   if (ownedStocks.length === 0) {
     return (
@@ -48,6 +62,14 @@ export function PortfolioSection() {
           </div>
         ))}
       </div>
+      {selectedStock && (
+        <TransactionModal
+          stock={selectedStock}
+          type={transactionType}
+          isOpen={true}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }
