@@ -9,13 +9,19 @@ interface DebugState {
   stepForward: () => void;
 }
 
-export const useDebugStore = create<DebugState>((set) => ({
+export const useDebugStore = create<DebugState>((set, get) => ({
   isDebugMode: false,
   isPaused: false,
+  
   toggleDebugMode: () => set((state) => ({ isDebugMode: !state.isDebugMode })),
-  togglePause: () => set((state) => ({ isPaused: !state.isPaused })),
+  
+  togglePause: () => {
+    set((state) => ({ isPaused: !state.isPaused }));
+    useStockStore.getState().setPaused(!get().isPaused);
+  },
+  
   stepForward: () => {
-    const { updateStockPrices } = useStockStore.getState();
-    updateStockPrices();
+    if (!get().isPaused) return;
+    useStockStore.getState().updateStockPrices();
   },
 }));
