@@ -95,19 +95,34 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
     const { members } = get();
     
     members.forEach((member) => {
+      // Calculate available cash (initial capital minus holdings value)
+      const holdingsValue = member.holdings.reduce((total, holding) => {
+        const stock = stocks.find(s => s.id === holding.stockId);
+        return total + (stock?.price || 0) * holding.quantity;
+      }, 0);
+      const availableCash = 100000 - holdingsValue; // Using initial capital of 100000
+      
       stocks.forEach((stock) => {
         const currentHolding = member.holdings.find(h => h.stockId === stock.id)?.quantity || 0;
-        const decision = member.strategy.analyze(stock, member.portfolioValue, currentHolding);
+        const decision = member.strategy.analyze(stock, availableCash, currentHolding);
+        
+        console.log(`${member.username} analyzing ${stock.symbol}:`, {
+          currentHolding,
+          availableCash,
+          decision
+        });
         
         if (decision.action === 'buy' && decision.quantity) {
           const success = buyStock(stock.id, decision.quantity);
           if (success) {
             get().updateMemberHoldings(member.id, stock.id, decision.quantity);
+            console.log(`${member.username} bought ${decision.quantity} shares of ${stock.symbol}`);
           }
         } else if (decision.action === 'sell' && decision.quantity) {
           const success = sellStock(stock.id, decision.quantity);
           if (success) {
             get().updateMemberHoldings(member.id, stock.id, -decision.quantity);
+            console.log(`${member.username} sold ${decision.quantity} shares of ${stock.symbol}`);
           }
         }
       });
