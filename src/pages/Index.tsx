@@ -8,12 +8,14 @@ import { Stock } from "@/utils/stockData";
 import { PortfolioSection } from "@/components/PortfolioSection";
 import { LeagueStandings } from "@/components/LeagueStandings";
 import { Separator } from "@/components/ui/separator";
+import { SearchInput } from "@/components/SearchInput";
 
 const Index = () => {
   const { stocks, updateStockPrices, updateInterval } = useStockStore();
   const { isPaused } = useDebugStore();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [transactionType, setTransactionType] = useState<"buy" | "sell">("buy");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (isPaused) return;
@@ -31,6 +33,11 @@ const Index = () => {
     setSelectedStock(null);
   };
 
+  const filteredStocks = stocks.filter((stock) =>
+    stock.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -45,9 +52,18 @@ const Index = () => {
         </div>
         <Separator className="my-8" />
         <div>
-          <h2 className="text-2xl font-bold mb-4">Market</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Market</h2>
+            <div className="w-64">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search by name or symbol..."
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stocks.map((stock) => (
+            {filteredStocks.map((stock) => (
               <StockCard
                 key={stock.id}
                 stock={stock}
