@@ -23,6 +23,7 @@ interface LeagueState {
   updateMemberPortfolios: () => void;
   addMember: (member: Omit<LeagueMember, 'strategy' | 'portfolioValue' | 'holdings'>) => void;
   executeTrades: () => void;
+  updateMemberHoldings: (memberId: string, stockId: string, quantity: number) => void;
 }
 
 export const useLeagueStore = create<LeagueState>((set, get) => ({
@@ -35,7 +36,7 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
         const portfolioValue = member.holdings.reduce((total, holding) => {
           const stock = stocks.find((s) => s.id === holding.stockId);
           return total + (stock?.price || 0) * holding.quantity;
-        }, 0);
+        }, 100000); // Add initial capital to portfolio value
         return { ...member, portfolioValue };
       }),
     }));
@@ -55,6 +56,39 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
       }],
     }));
   },
+
+  updateMemberHoldings: (memberId: string, stockId: string, quantity: number) => {
+    set((state) => ({
+      members: state.members.map((member) => {
+        if (member.id !== memberId) return member;
+
+        const existingHoldingIndex = member.holdings.findIndex(h => h.stockId === stockId);
+        let newHoldings = [...member.holdings];
+
+        if (existingHoldingIndex >= 0) {
+          const newQuantity = member.holdings[existingHoldingIndex].quantity + quantity;
+          if (newQuantity <= 0) {
+            // Remove holding if quantity becomes 0 or negative
+            newHoldings = newHoldings.filter(h => h.stockId !== stockId);
+          } else {
+            // Update existing holding
+            newHoldings[existingHoldingIndex] = {
+              ...newHoldings[existingHoldingIndex],
+              quantity: newQuantity
+            };
+          }
+        } else if (quantity > 0) {
+          // Add new holding only if quantity is positive
+          newHoldings.push({ stockId, quantity });
+        }
+
+        return {
+          ...member,
+          holdings: newHoldings,
+        };
+      }),
+    }));
+  },
   
   executeTrades: () => {
     const { stocks, buyStock, sellStock } = useStockStore.getState();
@@ -66,9 +100,15 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
         const decision = member.strategy.analyze(stock, member.portfolioValue, currentHolding);
         
         if (decision.action === 'buy' && decision.quantity) {
-          buyStock(stock.id, decision.quantity);
+          const success = buyStock(stock.id, decision.quantity);
+          if (success) {
+            get().updateMemberHoldings(member.id, stock.id, decision.quantity);
+          }
         } else if (decision.action === 'sell' && decision.quantity) {
-          sellStock(stock.id, decision.quantity);
+          const success = sellStock(stock.id, decision.quantity);
+          if (success) {
+            get().updateMemberHoldings(member.id, stock.id, -decision.quantity);
+          }
         }
       });
     });
