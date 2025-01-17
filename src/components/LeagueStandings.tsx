@@ -1,9 +1,11 @@
 import { useLeagueStore } from "@/store/leagueStore";
 import { Card } from "./ui/card";
 import { formatCurrency } from "@/utils/formatters";
+import { useStockStore } from "@/store/stockStore";
 
 export function LeagueStandings() {
   const { members } = useLeagueStore();
+  const { stocks } = useStockStore();
 
   if (members.length === 0) {
     return (
@@ -24,16 +26,38 @@ export function LeagueStandings() {
       <div className="grid gap-4">
         {sortedMembers.map((member) => (
           <Card key={member.id} className="p-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium">{member.username}</p>
-                <p className="text-sm text-muted-foreground">
-                  Strategy: {member.algorithm}
-                </p>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{member.username}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Strategy: {member.algorithm}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(member.portfolioValue)}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold">{formatCurrency(member.portfolioValue)}</p>
-              </div>
+              
+              {member.holdings.length > 0 && (
+                <div className="border-t pt-2">
+                  <p className="text-sm font-medium mb-2">Holdings:</p>
+                  <div className="space-y-2">
+                    {member.holdings.map((holding) => {
+                      const stock = stocks.find(s => s.id === holding.stockId);
+                      if (!stock) return null;
+                      
+                      const value = stock.price * holding.quantity;
+                      return (
+                        <div key={holding.stockId} className="flex justify-between text-sm">
+                          <span>{stock.symbol} ({holding.quantity} shares)</span>
+                          <span>{formatCurrency(value)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         ))}
