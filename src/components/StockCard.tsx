@@ -20,6 +20,7 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
         <div>
           <h3 className="text-lg font-bold">{stock.symbol}</h3>
           <p className="text-sm text-muted-foreground">{stock.name}</p>
+          <p className="text-xs text-muted-foreground mt-1">Team: {stock.team}</p>
         </div>
         <div className="text-right">
           <p className="text-xl font-bold">{formatCurrency(stock.price)}</p>

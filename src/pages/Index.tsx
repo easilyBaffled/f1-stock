@@ -35,7 +35,8 @@ export default function Index() {
 
   const filteredStocks = stocks.filter((stock) =>
     stock.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+    stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stock.team.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -53,12 +54,12 @@ export default function Index() {
         <Separator className="my-8" />
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Market</h2>
+            <h2 className="text-2xl font-bold">F1 Driver Market</h2>
             <div className="w-64">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder="Search by name or symbol..."
+                placeholder="Search by driver, team or symbol..."
               />
             </div>
           </div>
