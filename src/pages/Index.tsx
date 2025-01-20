@@ -10,7 +10,7 @@ import { LeagueStandings } from "@/components/LeagueStandings";
 import { Separator } from "@/components/ui/separator";
 import { SearchInput } from "@/components/SearchInput";
 
-const Index = () => {
+export default function Index() {
   const { stocks, updateStockPrices, updateInterval } = useStockStore();
   const { isPaused } = useDebugStore();
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
@@ -84,6 +84,4 @@ const Index = () => {
       )}
     </div>
   );
-};
-
-export default Index;
+}
