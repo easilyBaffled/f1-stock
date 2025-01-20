@@ -4,6 +4,9 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Newspaper } from "lucide-react";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StockCardProps {
   stock: Stock;
@@ -29,6 +32,29 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
     return stock.priceHistory.filter(
       (point) => point.timestamp > now - ranges[timeRange]
     );
+  };
+
+  const findSignificantChanges = () => {
+    const history = getFilteredPriceHistory();
+    const significantChanges = [];
+    const threshold = 0.02; // 2% change threshold
+
+    for (let i = 1; i < history.length; i++) {
+      const previousPrice = history[i - 1].price;
+      const currentPrice = history[i].price;
+      const percentChange = (currentPrice - previousPrice) / previousPrice;
+
+      if (Math.abs(percentChange) >= threshold && stock.news[i]) {
+        significantChanges.push({
+          x: i / (history.length - 1) * 100, // Convert to percentage for positioning
+          news: stock.news[i],
+          price: currentPrice,
+          timestamp: history[i].timestamp
+        });
+      }
+    }
+
+    return significantChanges;
   };
 
   return (
@@ -74,7 +100,7 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
         </Button>
       </div>
 
-      <div className="h-24 mb-4">
+      <div className="h-24 mb-4 relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={getFilteredPriceHistory()}>
             <defs>
@@ -92,6 +118,33 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
             />
           </AreaChart>
         </ResponsiveContainer>
+        
+        {/* News Markers */}
+        <div className="absolute inset-0 pointer-events-none">
+          <TooltipProvider>
+            {findSignificantChanges().map((change, index) => (
+              <div
+                key={index}
+                className="absolute top-0 h-full"
+                style={{ left: `${change.x}%` }}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="relative top-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto">
+                      <Newspaper className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-medium">{change.news.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(change.timestamp).toLocaleDateString()}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ))}
+          </TooltipProvider>
+        </div>
       </div>
 
       <div className="flex justify-between items-center">

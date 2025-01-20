@@ -1,3 +1,8 @@
+export interface NewsItem {
+  title: string;
+  timestamp: number;
+}
+
 export interface Stock {
   id: string;
   symbol: string;
@@ -7,6 +12,7 @@ export interface Stock {
   availableShares: number;
   priceHistory: { timestamp: number; price: number }[];
   team: string;
+  news: NewsItem[];
 }
 
 export const mockStocks: Stock[] = [
@@ -18,7 +24,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 349.75,
     availableShares: 1000,
     priceHistory: generatePriceHistory(350),
-    team: "Red Bull Racing"
+    team: "Red Bull Racing",
+    news: generateMockNews()
   },
   {
     id: "2",
@@ -28,7 +35,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 278.25,
     availableShares: 500,
     priceHistory: generatePriceHistory(275),
-    team: "Red Bull Racing"
+    team: "Red Bull Racing",
+    news: generateMockNews()
   },
   {
     id: "3",
@@ -38,7 +46,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 309.50,
     availableShares: 750,
     priceHistory: generatePriceHistory(310),
-    team: "Mercedes"
+    team: "Mercedes",
+    news: generateMockNews()
   },
   {
     id: "4",
@@ -48,7 +57,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 329.50,
     availableShares: 300,
     priceHistory: generatePriceHistory(330),
-    team: "Ferrari"
+    team: "Ferrari",
+    news: generateMockNews()
   },
   {
     id: "5",
@@ -58,7 +68,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 290.00,
     availableShares: 600,
     priceHistory: generatePriceHistory(295),
-    team: "McLaren"
+    team: "McLaren",
+    news: generateMockNews()
   },
   {
     id: "6",
@@ -68,7 +79,8 @@ export const mockStocks: Stock[] = [
     previousPrice: 288.75,
     availableShares: 450,
     priceHistory: generatePriceHistory(285),
-    team: "Mercedes"
+    team: "Mercedes",
+    news: generateMockNews()
   }
 ];
 
@@ -85,6 +97,25 @@ function generatePriceHistory(basePrice: number) {
   }
 
   return history;
+}
+
+function generateMockNews() {
+  const news: NewsItem[] = [];
+  const now = Date.now();
+  const dayInMs = 24 * 60 * 60 * 1000;
+
+  for (let i = 30; i >= 0; i--) {
+    if (Math.random() > 0.7) { // 30% chance of news on any given day
+      news.push({
+        title: `Performance Update ${i} days ago`,
+        timestamp: now - (i * dayInMs)
+      });
+    } else {
+      news.push({ title: "", timestamp: now - (i * dayInMs) });
+    }
+  }
+
+  return news;
 }
 
 export function generateNewPrice(currentPrice: number): number {
