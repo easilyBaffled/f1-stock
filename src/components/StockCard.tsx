@@ -100,50 +100,52 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
         </Button>
       </div>
 
-      <div className="h-24 mb-4 relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={getFilteredPriceHistory()}>
-            <defs>
-              <linearGradient id={`gradient-${stock.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0.3} />
-                <stop offset="100%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="price"
-              stroke={isPositive ? "#4CAF50" : "#FF5252"}
-              fill={`url(#gradient-${stock.id})`}
-              strokeWidth={2}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-        
-        {/* News Markers */}
-        <div className="absolute inset-0 pointer-events-none">
-          <TooltipProvider>
-            {findSignificantChanges().map((change, index) => (
-              <div
-                key={index}
-                className="absolute top-0 h-full"
-                style={{ left: `${change.x}%` }}
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="relative top-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto">
-                      <Newspaper className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="font-medium">{change.news.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(change.timestamp).toLocaleDateString()}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            ))}
-          </TooltipProvider>
+      <div className="h-24 mb-4">
+        <div className="relative h-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={getFilteredPriceHistory()}>
+              <defs>
+                <linearGradient id={`gradient-${stock.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0.3} />
+                  <stop offset="100%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="price"
+                stroke={isPositive ? "#4CAF50" : "#FF5252"}
+                fill={`url(#gradient-${stock.id})`}
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+          
+          {/* News Markers */}
+          <div className="absolute inset-0 pointer-events-none">
+            <TooltipProvider>
+              {findSignificantChanges().map((change, index) => (
+                <div
+                  key={index}
+                  className="absolute top-0 h-full"
+                  style={{ left: `${change.x}%` }}
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="relative top-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto">
+                        <Newspaper className="w-4 h-4 text-muted-foreground hover:text-foreground transition-colors" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-medium">{change.news.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(change.timestamp).toLocaleDateString()}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 
