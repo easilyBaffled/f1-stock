@@ -136,10 +136,22 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="font-medium">{change.news.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(change.timestamp).toLocaleDateString()}
-                      </p>
+                      <div className="space-y-2">
+                        <p className="font-medium">{change.news.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(change.timestamp).toLocaleDateString()}
+                        </p>
+                        {change.news.url && (
+                          <a
+                            href={change.news.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline block"
+                          >
+                            Read more →
+                          </a>
+                        )}
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </div>
