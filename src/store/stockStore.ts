@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Stock, mockStocks, generateNewPrice } from '../utils/stockData';
+import { Stock, generateStockData, generateNewPrice, ScenarioType } from '../utils/stockData';
 import { useLeagueStore } from './leagueStore';
 
 export interface Transaction {
@@ -17,21 +17,28 @@ interface StockState {
   portfolio: { [key: string]: number };
   transactions: Transaction[];
   updateInterval: number;
-  isPaused: boolean;
+  scenario: ScenarioType;
+  setScenario: (scenario: ScenarioType) => void;
   setUpdateInterval: (interval: number) => void;
   updateStockPrices: () => void;
   buyStock: (stockId: string, quantity: number) => boolean;
   sellStock: (stockId: string, quantity: number) => boolean;
-  setPaused: (paused: boolean) => void;
 }
 
 export const useStockStore = create<StockState>((set, get) => ({
-  stocks: mockStocks,
+  stocks: generateStockData('midweek'),
   walletBalance: 100000,
   portfolio: {},
   transactions: [],
   updateInterval: 60000,
-  isPaused: false,
+  scenario: 'midweek',
+
+  setScenario: (scenario: ScenarioType) => {
+    set({ 
+      stocks: generateStockData(scenario),
+      scenario 
+    });
+  },
 
   setUpdateInterval: (interval: number) => set({ updateInterval: interval }),
 
@@ -122,6 +129,4 @@ export const useStockStore = create<StockState>((set, get) => ({
     
     return true;
   },
-
-  setPaused: (paused: boolean) => set({ isPaused: paused }),
 }));

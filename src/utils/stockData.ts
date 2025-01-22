@@ -16,7 +16,6 @@ export interface Stock {
   news: NewsItem[];
 }
 
-// Simulation scenarios
 export type ScenarioType = 'midweek' | 'raceday' | 'postseason';
 
 const scenarios = {
@@ -108,74 +107,78 @@ function generatePriceHistory(basePrice: number, scenario: ScenarioType) {
   return history;
 }
 
-export const mockStocks: Stock[] = [
-  {
-    id: "1",
-    symbol: "VER",
-    name: "Max Verstappen",
-    price: 350.25,
-    previousPrice: 349.75,
-    availableShares: 1000 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(350, 'midweek'),
-    team: "Red Bull Racing",
-    news: generateMockNews('midweek')
-  },
-  {
-    id: "2",
-    symbol: "PER",
-    name: "Sergio Perez",
-    price: 275.50,
-    previousPrice: 278.25,
-    availableShares: 500 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(275, 'midweek'),
-    team: "Red Bull Racing",
-    news: generateMockNews('midweek')
-  },
-  {
-    id: "3",
-    symbol: "HAM",
-    name: "Lewis Hamilton",
-    price: 310.75,
-    previousPrice: 309.50,
-    availableShares: 750 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(310, 'midweek'),
-    team: "Mercedes",
-    news: generateMockNews('midweek')
-  },
-  {
-    id: "4",
-    symbol: "LEC",
-    name: "Charles Leclerc",
-    price: 330.00,
-    previousPrice: 329.50,
-    availableShares: 300 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(330, 'midweek'),
-    team: "Ferrari",
-    news: generateMockNews('midweek')
-  },
-  {
-    id: "5",
-    symbol: "NOR",
-    name: "Lando Norris",
-    price: 295.25,
-    previousPrice: 290.00,
-    availableShares: 600 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(295, 'midweek'),
-    team: "McLaren",
-    news: generateMockNews('midweek')
-  },
-  {
-    id: "6",
-    symbol: "RUS",
-    name: "George Russell",
-    price: 285.50,
-    previousPrice: 288.75,
-    availableShares: 450 * scenarios.midweek.volumeMultiplier,
-    priceHistory: generatePriceHistory(285, 'midweek'),
-    team: "Mercedes",
-    news: generateMockNews('midweek')
-  }
-];
+export function generateStockData(scenario: ScenarioType): Stock[] {
+  const { volumeMultiplier } = scenarios[scenario];
+  
+  return [
+    {
+      id: "1",
+      symbol: "VER",
+      name: "Max Verstappen",
+      price: 350.25,
+      previousPrice: 349.75,
+      availableShares: 1000 * volumeMultiplier,
+      priceHistory: generatePriceHistory(350, scenario),
+      team: "Red Bull Racing",
+      news: generateMockNews(scenario)
+    },
+    {
+      id: "2",
+      symbol: "PER",
+      name: "Sergio Perez",
+      price: 275.50,
+      previousPrice: 278.25,
+      availableShares: 500 * volumeMultiplier,
+      priceHistory: generatePriceHistory(275, scenario),
+      team: "Red Bull Racing",
+      news: generateMockNews(scenario)
+    },
+    {
+      id: "3",
+      symbol: "HAM",
+      name: "Lewis Hamilton",
+      price: 310.75,
+      previousPrice: 309.50,
+      availableShares: 750 * volumeMultiplier,
+      priceHistory: generatePriceHistory(310, scenario),
+      team: "Mercedes",
+      news: generateMockNews(scenario)
+    },
+    {
+      id: "4",
+      symbol: "LEC",
+      name: "Charles Leclerc",
+      price: 330.00,
+      previousPrice: 329.50,
+      availableShares: 300 * volumeMultiplier,
+      priceHistory: generatePriceHistory(330, scenario),
+      team: "Ferrari",
+      news: generateMockNews(scenario)
+    },
+    {
+      id: "5",
+      symbol: "NOR",
+      name: "Lando Norris",
+      price: 295.25,
+      previousPrice: 290.00,
+      availableShares: 600 * volumeMultiplier,
+      priceHistory: generatePriceHistory(295, scenario),
+      team: "McLaren",
+      news: generateMockNews(scenario)
+    },
+    {
+      id: "6",
+      symbol: "RUS",
+      name: "George Russell",
+      price: 285.50,
+      previousPrice: 288.75,
+      availableShares: 450 * volumeMultiplier,
+      priceHistory: generatePriceHistory(285, scenario),
+      team: "Mercedes",
+      news: generateMockNews(scenario)
+    }
+  ];
+}
 
 export function generateNewPrice(currentPrice: number): number {
   const maxChange = currentPrice * 0.05; // 5% maximum change

@@ -17,7 +17,9 @@ export function Header() {
     updateInterval, 
     setUpdateInterval,
     stocks,
-    portfolio
+    portfolio,
+    scenario,
+    setScenario
   } = useStockStore();
   
   const {
@@ -69,6 +71,19 @@ export function Header() {
                 <SelectItem value="30000">30 seconds</SelectItem>
                 <SelectItem value="60000">1 minute</SelectItem>
                 <SelectItem value="300000">5 minutes</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={scenario}
+              onValueChange={(value) => setScenario(value as ScenarioType)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select scenario" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="midweek">Mid-Week</SelectItem>
+                <SelectItem value="raceday">Race Day</SelectItem>
+                <SelectItem value="postseason">Post-Season</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex items-center space-x-2">
