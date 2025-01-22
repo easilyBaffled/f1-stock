@@ -1,6 +1,7 @@
 export interface NewsItem {
   title: string;
   timestamp: number;
+  url?: string;
 }
 
 export interface Stock {
@@ -15,83 +16,91 @@ export interface Stock {
   news: NewsItem[];
 }
 
-export const mockStocks: Stock[] = [
-  {
-    id: "1",
-    symbol: "VER",
-    name: "Max Verstappen",
-    price: 350.25,
-    previousPrice: 349.75,
-    availableShares: 1000,
-    priceHistory: generatePriceHistory(350),
-    team: "Red Bull Racing",
-    news: generateMockNews()
-  },
-  {
-    id: "2",
-    symbol: "PER",
-    name: "Sergio Perez",
-    price: 275.50,
-    previousPrice: 278.25,
-    availableShares: 500,
-    priceHistory: generatePriceHistory(275),
-    team: "Red Bull Racing",
-    news: generateMockNews()
-  },
-  {
-    id: "3",
-    symbol: "HAM",
-    name: "Lewis Hamilton",
-    price: 310.75,
-    previousPrice: 309.50,
-    availableShares: 750,
-    priceHistory: generatePriceHistory(310),
-    team: "Mercedes",
-    news: generateMockNews()
-  },
-  {
-    id: "4",
-    symbol: "LEC",
-    name: "Charles Leclerc",
-    price: 330.00,
-    previousPrice: 329.50,
-    availableShares: 300,
-    priceHistory: generatePriceHistory(330),
-    team: "Ferrari",
-    news: generateMockNews()
-  },
-  {
-    id: "5",
-    symbol: "NOR",
-    name: "Lando Norris",
-    price: 295.25,
-    previousPrice: 290.00,
-    availableShares: 600,
-    priceHistory: generatePriceHistory(295),
-    team: "McLaren",
-    news: generateMockNews()
-  },
-  {
-    id: "6",
-    symbol: "RUS",
-    name: "George Russell",
-    price: 285.50,
-    previousPrice: 288.75,
-    availableShares: 450,
-    priceHistory: generatePriceHistory(285),
-    team: "Mercedes",
-    news: generateMockNews()
-  }
-];
+// Simulation scenarios
+export type ScenarioType = 'midweek' | 'raceday' | 'postseason';
 
-function generatePriceHistory(basePrice: number) {
-  const history = [];
+const scenarios = {
+  midweek: {
+    news: [
+      {
+        title: "Breaking: Hamilton in Talks with Ferrari for Next Season",
+        url: "https://www.espn.com/f1/breaking/hamilton-ferrari",
+      },
+      {
+        title: "Red Bull Unveils Major Upgrade Package for Next Race",
+        url: "https://www.espn.com/f1/redbull-upgrades",
+      }
+    ],
+    volatility: 0.03, // 3% price swings
+    volumeMultiplier: 1,
+  },
+  raceday: {
+    news: [
+      {
+        title: "Verstappen Takes Pole Position in Qualifying",
+        url: "https://www.espn.com/f1/qualifying-results",
+      },
+      {
+        title: "Ferrari Strategy Blunder Costs Leclerc Podium",
+        url: "https://www.espn.com/f1/ferrari-strategy-error",
+      }
+    ],
+    volatility: 0.05, // 5% price swings
+    volumeMultiplier: 2, // Double the trading volume
+  },
+  postseason: {
+    news: [
+      {
+        title: "2024 Season Review: Records Broken and Milestones Achieved",
+        url: "https://www.espn.com/f1/season-review",
+      },
+      {
+        title: "Teams Announce Driver Lineups for 2025",
+        url: "https://www.espn.com/f1/driver-lineup-2025",
+      }
+    ],
+    volatility: 0.02, // 2% price swings
+    volumeMultiplier: 0.5, // Half the trading volume
+  }
+};
+
+function generateMockNews(scenario: ScenarioType) {
+  const news: NewsItem[] = [];
   const now = Date.now();
   const dayInMs = 24 * 60 * 60 * 1000;
 
   for (let i = 30; i >= 0; i--) {
     const timestamp = now - (i * dayInMs);
-    const randomChange = (Math.random() - 0.5) * 10;
+    if (i === 1) { // Add scenario-specific news for recent history
+      scenarios[scenario].news.forEach((newsItem, index) => {
+        news.push({
+          title: newsItem.title,
+          url: newsItem.url,
+          timestamp: timestamp + (index * 3600000) // Space out news by hours
+        });
+      });
+    } else if (Math.random() > 0.7) { // 30% chance of news on other days
+      news.push({
+        title: `Performance Update ${i} days ago`,
+        timestamp
+      });
+    } else {
+      news.push({ title: "", timestamp });
+    }
+  }
+
+  return news;
+}
+
+function generatePriceHistory(basePrice: number, scenario: ScenarioType) {
+  const history = [];
+  const now = Date.now();
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const { volatility } = scenarios[scenario];
+
+  for (let i = 30; i >= 0; i--) {
+    const timestamp = now - (i * dayInMs);
+    const randomChange = (Math.random() - 0.5) * 2 * volatility * basePrice;
     const price = basePrice + randomChange;
     history.push({ timestamp, price });
   }
@@ -99,24 +108,74 @@ function generatePriceHistory(basePrice: number) {
   return history;
 }
 
-function generateMockNews() {
-  const news: NewsItem[] = [];
-  const now = Date.now();
-  const dayInMs = 24 * 60 * 60 * 1000;
-
-  for (let i = 30; i >= 0; i--) {
-    if (Math.random() > 0.7) { // 30% chance of news on any given day
-      news.push({
-        title: `Performance Update ${i} days ago`,
-        timestamp: now - (i * dayInMs)
-      });
-    } else {
-      news.push({ title: "", timestamp: now - (i * dayInMs) });
-    }
+export const mockStocks: Stock[] = [
+  {
+    id: "1",
+    symbol: "VER",
+    name: "Max Verstappen",
+    price: 350.25,
+    previousPrice: 349.75,
+    availableShares: 1000 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(350, 'midweek'),
+    team: "Red Bull Racing",
+    news: generateMockNews('midweek')
+  },
+  {
+    id: "2",
+    symbol: "PER",
+    name: "Sergio Perez",
+    price: 275.50,
+    previousPrice: 278.25,
+    availableShares: 500 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(275, 'midweek'),
+    team: "Red Bull Racing",
+    news: generateMockNews('midweek')
+  },
+  {
+    id: "3",
+    symbol: "HAM",
+    name: "Lewis Hamilton",
+    price: 310.75,
+    previousPrice: 309.50,
+    availableShares: 750 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(310, 'midweek'),
+    team: "Mercedes",
+    news: generateMockNews('midweek')
+  },
+  {
+    id: "4",
+    symbol: "LEC",
+    name: "Charles Leclerc",
+    price: 330.00,
+    previousPrice: 329.50,
+    availableShares: 300 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(330, 'midweek'),
+    team: "Ferrari",
+    news: generateMockNews('midweek')
+  },
+  {
+    id: "5",
+    symbol: "NOR",
+    name: "Lando Norris",
+    price: 295.25,
+    previousPrice: 290.00,
+    availableShares: 600 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(295, 'midweek'),
+    team: "McLaren",
+    news: generateMockNews('midweek')
+  },
+  {
+    id: "6",
+    symbol: "RUS",
+    name: "George Russell",
+    price: 285.50,
+    previousPrice: 288.75,
+    availableShares: 450 * scenarios.midweek.volumeMultiplier,
+    priceHistory: generatePriceHistory(285, 'midweek'),
+    team: "Mercedes",
+    news: generateMockNews('midweek')
   }
-
-  return news;
-}
+];
 
 export function generateNewPrice(currentPrice: number): number {
   const maxChange = currentPrice * 0.05; // 5% maximum change
