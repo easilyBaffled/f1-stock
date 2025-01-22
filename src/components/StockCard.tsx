@@ -1,6 +1,6 @@
 import { Stock } from "@/utils/stockData";
 import { formatCurrency, formatNumber } from "@/utils/formatters";
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -56,18 +56,6 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
     return significantChanges;
   };
 
-  const formatXAxis = (timestamp: number) => {
-    const date = new Date(timestamp);
-    switch (timeRange) {
-      case "1D":
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      case "1W":
-        return date.toLocaleDateString([], { weekday: 'short' });
-      case "1M":
-        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
-  };
-
   return (
     <Card className="p-4 glass hover:bg-accent/10 transition-colors">
       <div className="flex justify-between items-start mb-4">
@@ -114,29 +102,13 @@ export function StockCard({ stock, onBuy, onSell }: StockCardProps) {
       <div className="h-24 mb-4">
         <div className="relative h-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={getFilteredPriceHistory()} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+            <AreaChart data={getFilteredPriceHistory()}>
               <defs>
                 <linearGradient id={`gradient-${stock.id}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0.3} />
                   <stop offset="100%" stopColor={isPositive ? "#4CAF50" : "#FF5252"} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={formatXAxis}
-                tick={{ fontSize: 10, fill: 'currentColor' }}
-                tickLine={{ stroke: 'currentColor' }}
-                axisLine={{ stroke: 'currentColor' }}
-                minTickGap={30}
-              />
-              <YAxis 
-                domain={['auto', 'auto']}
-                tick={{ fontSize: 10, fill: 'currentColor' }}
-                tickLine={{ stroke: 'currentColor' }}
-                axisLine={{ stroke: 'currentColor' }}
-                tickFormatter={(value) => formatCurrency(value)}
-                width={60}
-              />
               <Area
                 type="monotone"
                 dataKey="price"
