@@ -1,6 +1,7 @@
 import { formatCurrency } from "@/utils/formatters";
 import { useStockStore } from "@/store/stockStore";
 import { useDebugStore } from "@/store/debugStore";
+import { ScenarioType } from "@/utils/stockData";
 import {
   Select,
   SelectContent,

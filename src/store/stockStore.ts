@@ -18,6 +18,8 @@ interface StockState {
   transactions: Transaction[];
   updateInterval: number;
   scenario: ScenarioType;
+  isPaused?: boolean;
+  setPaused: (paused: boolean) => void;
   setScenario: (scenario: ScenarioType) => void;
   setUpdateInterval: (interval: number) => void;
   updateStockPrices: () => void;
@@ -32,6 +34,9 @@ export const useStockStore = create<StockState>((set, get) => ({
   transactions: [],
   updateInterval: 60000,
   scenario: 'midweek',
+  isPaused: false,
+
+  setPaused: (paused: boolean) => set({ isPaused: paused }),
 
   setScenario: (scenario: ScenarioType) => {
     set({ 
