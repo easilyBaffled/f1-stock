@@ -1,69 +1,270 @@
-# Welcome to your Lovable project
+# F1 Stock Market Simulator
 
-## Project info
+A real-time Formula 1 stock market simulator with AI traders and portfolio management. This application simulates a market where users can trade F1 driver stocks while competing against AI traders using different strategies.
 
-**URL**: https://lovable.dev/projects/60ddd648-ec71-4a13-8db1-4a3bc43f58aa
+## Architecture Overview
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/60ddd648-ec71-4a13-8db1-4a3bc43f58aa) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```mermaid
+graph TD
+    A[App] --> B[Market Overview]
+    A --> C[League Portfolios]
+    A --> D[Debug Controls]
+    
+    B --> E[Stock Cards]
+    B --> F[Trade Modal]
+    
+    C --> G[AI Traders]
+    G --> H[Trading Strategies]
+    
+    subgraph State Management
+        I[Stock Store]
+        J[League Store]
+        K[Debug Store]
+    end
+    
+    H --> M[Technical Analysis]
+    H --> N[Fundamental Analysis]
 ```
 
-**Edit a file directly in GitHub**
+## Core Components
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### State Management
 
-**Use GitHub Codespaces**
+The application uses Zustand for state management with three main stores:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. **Stock Store** (`stockStore.ts`)
+   - Manages stock data and market state
+   - Handles real-time price updates
+   - Processes trade executions
+   ```typescript
+   interface StockState {
+     stocks: Stock[];
+     walletBalance: number;
+     portfolio: { [key: string]: number };
+     transactions: Transaction[];
+     updateInterval: number;
+     scenario: ScenarioType;
+     isPaused?: boolean;
+   }
+   ```
 
-## What technologies are used for this project?
+2. **League Store** (`leagueStore.ts`)
+   - Manages AI trader portfolios
+   - Tracks league performance
+   ```typescript
+   interface LeagueState {
+     members: LeagueMember[];
+     updateMemberPortfolios: () => void;
+     executeTrades: () => void;
+   }
+   ```
 
-This project is built with .
+3. **Debug Store** (`debugStore.ts`)
+   - Controls simulation debugging
+   - Manages pause/resume functionality
+   ```typescript
+   interface DebugState {
+     isDebugMode: boolean;
+     isPaused: boolean;
+     toggleDebugMode: () => void;
+     togglePause: () => void;
+   }
+   ```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Trading System
 
-## How can I deploy this project?
+#### Strategy Pattern Implementation
 
-Simply open [Lovable](https://lovable.dev/projects/60ddd648-ec71-4a13-8db1-4a3bc43f58aa) and click on Share -> Publish.
+The trading system uses a strategy pattern for implementing different trading algorithms:
 
-## I want to use a custom domain - is that possible?
+```typescript
+abstract class BaseStrategy {
+  abstract analyze(
+    stock: Stock,
+    portfolioValue: number,
+    currentHoldings: number
+  ): TradingDecision;
+}
+```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Available strategies:
+- Value Strategy: Based on fundamental analysis
+- Momentum Strategy: Based on technical analysis
+
+#### Analysis Tools
+
+1. **Technical Analysis** (`technical.ts`)
+   ```typescript
+   interface MomentumSignals {
+     strongBuy: boolean;
+     strongSell: boolean;
+     rsi: number;
+     macdSignal: 'buy' | 'sell' | 'neutral';
+   }
+   ```
+
+2. **Fundamental Analysis** (`fundamentals.ts`)
+   ```typescript
+   interface ValueMetrics {
+     isUndervalued: boolean;
+     isOvervalued: boolean;
+     peRatio: number;
+     priceToBook: number;
+   }
+   ```
+
+## Data Flow
+
+1. **Price Updates**
+```mermaid
+sequenceDiagram
+    participant Timer
+    participant StockStore
+    participant AITraders
+    participant UI
+    
+    Timer->>StockStore: Update Interval
+    StockStore->>StockStore: Update Prices
+    StockStore->>AITraders: Notify Price Change
+    AITraders->>StockStore: Execute Trades
+    StockStore->>UI: Render Updates
+```
+
+2. **Trading Flow**
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI
+    participant StockStore
+    participant LeagueStore
+    
+    User->>UI: Initiate Trade
+    UI->>StockStore: Execute Trade
+    StockStore->>LeagueStore: Update Portfolio
+    LeagueStore->>UI: Update Display
+```
+
+## Type Definitions
+
+Key interfaces that define the system:
+
+```typescript
+interface Stock {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  previousPrice: number;
+  availableShares: number;
+  priceHistory: { timestamp: number; price: number }[];
+  team: string;
+  news: NewsItem[];
+}
+
+interface NewsItem {
+  title: string;
+  timestamp: number;
+  url?: string;
+}
+
+interface Transaction {
+  id: string;
+  stockId: string;
+  type: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  timestamp: number;
+}
+
+interface LeagueMember {
+  id: string;
+  username: string;
+  algorithm: 'Conservative' | 'Aggressive' | 'Random';
+  portfolioValue: number;
+  holdings: MemberHolding[];
+  strategy: BaseStrategy;
+}
+
+type ScenarioType = 'midweek' | 'raceday' | 'postseason';
+```
+
+## Market Scenarios
+
+The simulator supports three different market scenarios:
+
+1. **Mid-Week** (`midweek`)
+   - Normal trading conditions
+   - 3% price volatility
+   - Standard trading volume
+
+2. **Race Day** (`raceday`)
+   - High volatility trading
+   - 5% price swings
+   - Double trading volume
+   - Race-specific news events
+
+3. **Post-Season** (`postseason`)
+   - Lower volatility
+   - 2% price swings
+   - Half trading volume
+   - Season wrap-up news
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open http://localhost:8080 in your browser
+
+## Development Guidelines
+
+1. **Adding New Trading Strategies**
+   - Create a new class extending `BaseStrategy`
+   - Implement the `analyze` method
+   - Register the strategy in `leagueStore.ts`
+
+2. **Modifying Market Scenarios**
+   - Update scenario configurations in `stockData.ts`
+   - Adjust volatility and volume multipliers
+   - Add relevant news items
+
+3. **State Management Best Practices**
+   - Use appropriate store for related state
+   - Maintain immutability
+   - Follow Zustand patterns
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── Header.tsx      # Main navigation and controls
+│   ├── StockCard.tsx   # Individual stock display
+│   └── ...
+├── store/              # State management
+│   ├── stockStore.ts   # Market state
+│   ├── leagueStore.ts  # AI traders
+│   └── debugStore.ts   # Debug controls
+├── trading/            # Trading system
+│   ├── strategies/     # Trading algorithms
+│   └── analysis/       # Market analysis tools
+└── utils/              # Utility functions
+    └── stockData.ts    # Market data generation
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
