@@ -10,6 +10,7 @@
     import { Separator } from "@/components/ui/separator";
     import { SearchInput } from "@/components/SearchInput";
     import { ScrollArea } from "@/components/ui/scroll-area";
+    import { NewsFeed } from "@/components/NewsFeed";
 
     export default function Index() {
       const { stocks, updateStockPrices, updateInterval } = useStockStore();
@@ -62,6 +63,7 @@
                           stock={stock}
                           onBuy={() => handleTransaction(stock, "buy")}
                           onSell={() => handleTransaction(stock, "sell")}
+                          variant="sidebar"
                         />
                       ))}
                     </div>
@@ -72,6 +74,9 @@
                 <PortfolioSection />
                 <div className="mt-8">
                   <LeagueStandings />
+                </div>
+                <div className="mt-8">
+                  <NewsFeed />
                 </div>
               </div>
             </div>
