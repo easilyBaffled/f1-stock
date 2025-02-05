@@ -1,305 +1,303 @@
-```markdown
-    # F1 Stock Market Simulator
+# F1 Stock Market Simulator
 
-    A real-time Formula 1 stock market simulator with AI traders and portfolio management. This application simulates a market where users can trade F1 driver stocks while competing against AI traders using different strategies.
+A real-time Formula 1 stock market simulator with AI traders and portfolio management. This application simulates a market where users can trade F1 driver stocks while competing against AI traders using different strategies.
 
-    ## Architecture Overview
+## Architecture Overview
 
-    ```mermaid
-    graph TD
-        A[App] --> B[Market Overview]
-        A --> C[League Portfolios]
-        A --> D[Debug Controls]
-        A --> E[News Feed]
-        
-        B --> F[Stock Cards]
-        B --> G[Trade Modal]
-        
-        C --> H[AI Traders]
-        H --> I[Trading Strategies]
-        
-        subgraph State Management
-            J[Stock Store]
-            K[League Store]
-            L[Debug Store]
-        end
-        
-        I --> M[Technical Analysis]
-        I --> N[Fundamental Analysis]
-    ```
+```mermaid
+graph TD
+	A[App] --> B[Market Overview]
+	A --> C[League Portfolios]
+	A --> D[Debug Controls]
+	A --> E[News Feed]
 
-    ## Core Components
+	B --> F[Stock Cards]
+	B --> G[Trade Modal]
 
-    ### State Management
+	C --> H[AI Traders]
+	H --> I[Trading Strategies]
 
-    The application uses Zustand for state management with three main stores:
+	subgraph State Management
+		J[Stock Store]
+		K[League Store]
+		L[Debug Store]
+	end
 
-    1. **Stock Store** (`stockStore.ts`)
-       - Manages stock data and market state
-       - Handles real-time price updates
-       - Processes trade executions
-       ```typescript
-       interface StockState {
-         stocks: Stock[];
-         walletBalance: number;
-         portfolio: { [key: string]: number };
-         transactions: Transaction[];
-         updateInterval: number;
-         scenario: ScenarioType;
-         isPaused?: boolean;
-       }
-       ```
+	I --> M[Technical Analysis]
+	I --> N[Fundamental Analysis]
+```
 
-    2. **League Store** (`leagueStore.ts`)
-       - Manages AI trader portfolios
-       - Tracks league performance
-       ```typescript
-       interface LeagueState {
-         members: LeagueMember[];
-         updateMemberPortfolios: () => void;
-         executeTrades: () => void;
-       }
-       ```
+## Core Components
 
-    3. **Debug Store** (`debugStore.ts`)
-       - Controls simulation debugging
-       - Manages pause/resume functionality
-       ```typescript
-       interface DebugState {
-         isDebugMode: boolean;
-         isPaused: boolean;
-         toggleDebugMode: () => void;
-         togglePause: () => void;
-       }
-       ```
+### State Management
 
-    ### Trading System
+The application uses Zustand for state management with three main stores:
 
-    #### Strategy Pattern Implementation
+1. **Stock Store** (`stockStore.ts`)
+   - Manages stock data and market state
+   - Handles real-time price updates
+   - Processes trade executions
+   ```typescript
+   interface StockState {
+	 stocks: Stock[];
+	 walletBalance: number;
+	 portfolio: { [key: string]: number };
+	 transactions: Transaction[];
+	 updateInterval: number;
+	 scenario: ScenarioType;
+	 isPaused?: boolean;
+   }
+   ```
 
-    The trading system uses a strategy pattern for implementing different trading algorithms:
+2. **League Store** (`leagueStore.ts`)
+   - Manages AI trader portfolios
+   - Tracks league performance
+   ```typescript
+   interface LeagueState {
+	 members: LeagueMember[];
+	 updateMemberPortfolios: () => void;
+	 executeTrades: () => void;
+   }
+   ```
 
-    ```typescript
-    abstract class BaseStrategy {
-      abstract analyze(
-        stock: Stock,
-        portfolioValue: number,
-        currentHoldings: number
-      ): TradingDecision;
-    }
-    ```
+3. **Debug Store** (`debugStore.ts`)
+   - Controls simulation debugging
+   - Manages pause/resume functionality
+   ```typescript
+   interface DebugState {
+	 isDebugMode: boolean;
+	 isPaused: boolean;
+	 toggleDebugMode: () => void;
+	 togglePause: () => void;
+   }
+   ```
 
-    Available strategies:
-    - Value Strategy: Based on fundamental analysis
-    - Momentum Strategy: Based on technical analysis
+### Trading System
 
-    #### Analysis Tools
+#### Strategy Pattern Implementation
 
-    1. **Technical Analysis** (`technical.ts`)
-       ```typescript
-       interface MomentumSignals {
-         strongBuy: boolean;
-         strongSell: boolean;
-         rsi: number;
-         macdSignal: 'buy' | 'sell' | 'neutral';
-       }
-       ```
+The trading system uses a strategy pattern for implementing different trading algorithms:
 
-    2. **Fundamental Analysis** (`fundamentals.ts`)
-       ```typescript
-       interface ValueMetrics {
-         isUndervalued: boolean;
-         isOvervalued: boolean;
-         peRatio: number;
-         priceToBook: number;
-       }
-       ```
+```typescript
+abstract class BaseStrategy {
+  abstract analyze(
+	stock: Stock,
+	portfolioValue: number,
+	currentHoldings: number
+  ): TradingDecision;
+}
+```
 
-    ## Data Flow
+Available strategies:
+- Value Strategy: Based on fundamental analysis
+- Momentum Strategy: Based on technical analysis
 
-    1. **Price Updates**
-    ```mermaid
-    sequenceDiagram
-        participant Timer
-        participant StockStore
-        participant AITraders
-        participant UI
-        
-        Timer->>StockStore: Update Interval
-        StockStore->>StockStore: Update Prices
-        StockStore->>AITraders: Notify Price Change
-        AITraders->>StockStore: Execute Trades
-        StockStore->>UI: Render Updates
-    ```
+#### Analysis Tools
 
-    2. **Trading Flow**
-    ```mermaid
-    sequenceDiagram
-        participant User
-        participant UI
-        participant StockStore
-        participant LeagueStore
-        
-        User->>UI: Initiate Trade
-        UI->>StockStore: Execute Trade
-        StockStore->>LeagueStore: Update Portfolio
-        LeagueStore->>UI: Update Display
-    ```
+1. **Technical Analysis** (`technical.ts`)
+   ```typescript
+   interface MomentumSignals {
+	 strongBuy: boolean;
+	 strongSell: boolean;
+	 rsi: number;
+	 macdSignal: 'buy' | 'sell' | 'neutral';
+   }
+   ```
 
-    ## Type Definitions
+2. **Fundamental Analysis** (`fundamentals.ts`)
+   ```typescript
+   interface ValueMetrics {
+	 isUndervalued: boolean;
+	 isOvervalued: boolean;
+	 peRatio: number;
+	 priceToBook: number;
+   }
+   ```
 
-    Key interfaces that define the system:
+## Data Flow
 
-    ```typescript
-    interface Stock {
-      id: string;
-      symbol: string;
-      name: string;
-      price: number;
-      previousPrice: number;
-      availableShares: number;
-      priceHistory: { timestamp: number; price: number }[];
-      team: string;
-      news: NewsItem[];
-    }
+1. **Price Updates**
+```mermaid
+sequenceDiagram
+	participant Timer
+	participant StockStore
+	participant AITraders
+	participant UI
 
-    interface NewsItem {
-      title: string;
-      timestamp: number;
-      url?: string;
-    }
+	Timer->>StockStore: Update Interval
+	StockStore->>StockStore: Update Prices
+	StockStore->>AITraders: Notify Price Change
+	AITraders->>StockStore: Execute Trades
+	StockStore->>UI: Render Updates
+```
 
-    interface Transaction {
-      id: string;
-      stockId: string;
-      type: 'buy' | 'sell';
-      quantity: number;
-      price: number;
-      timestamp: number;
-    }
+2. **Trading Flow**
+```mermaid
+sequenceDiagram
+	participant User
+	participant UI
+	participant StockStore
+	participant LeagueStore
 
-    interface LeagueMember {
-      id: string;
-      username: string;
-      algorithm: 'Conservative' | 'Aggressive' | 'Random';
-      portfolioValue: number;
-      holdings: MemberHolding[];
-      strategy: BaseStrategy;
-    }
+	User->>UI: Initiate Trade
+	UI->>StockStore: Execute Trade
+	StockStore->>LeagueStore: Update Portfolio
+	LeagueStore->>UI: Update Display
+```
 
-    type ScenarioType = 'midweek' | 'raceday' | 'postseason';
-    ```
+## Type Definitions
 
-    ## Market Scenarios
+Key interfaces that define the system:
 
-    The simulator supports three different market scenarios:
+```typescript
+interface Stock {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  previousPrice: number;
+  availableShares: number;
+  priceHistory: { timestamp: number; price: number }[];
+  team: string;
+  news: NewsItem[];
+}
 
-    1. **Mid-Week** (`midweek`)
-       - Normal trading conditions
-       - 3% price volatility
-       - Standard trading volume
+interface NewsItem {
+  title: string;
+  timestamp: number;
+  url?: string;
+}
 
-    2. **Race Day** (`raceday`)
-       - High volatility trading
-       - 5% price swings
-       - Double trading volume
-       - Race-specific news events
+interface Transaction {
+  id: string;
+  stockId: string;
+  type: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  timestamp: number;
+}
 
-    3. **Post-Season** (`postseason`)
-       - Lower volatility
-       - 2% price swings
-       - Half trading volume
-       - Season wrap-up news
+interface LeagueMember {
+  id: string;
+  username: string;
+  algorithm: 'Conservative' | 'Aggressive' | 'Random';
+  portfolioValue: number;
+  holdings: MemberHolding[];
+  strategy: BaseStrategy;
+}
 
-    ## New Features
+type ScenarioType = 'midweek' | 'raceday' | 'postseason';
+```
 
-    *   **Stock Detail Modal:** Tapping a driver card now opens a modal dialog displaying a detailed stock chart, key performance metrics (P/E ratio, EPS), and relevant statistics (volume, market cap).
-    *   **News Indicators:** News indicators are displayed as small circles along the bottom of the stock chart in the modal. Clicking on an indicator shows a tooltip with the headline and a link to the article.
-    *   **News Feed:** A new "News Feed" component is added below the "League Standings" section, displaying the latest news headlines, summaries, and stock indicators with positive/negative impact.
-    *   **Stock Card Variants:** The `StockCard` component now renders differently based on its location. In the left sidebar, it displays a smaller, less detailed version, while in the portfolio section, it displays the full, detailed version.
-    *   **Scrollable Driver List:** The driver list is now scrollable, allowing users to see more drivers at once.
-    *   **Layout Adjustments:** The driver list is now positioned to the left of the portfolio section and stretches the full height of the section. The League Standings section is now positioned below the Portfolio section.
+## Market Scenarios
 
-    ## Updated Functionalities
+The simulator supports three different market scenarios:
 
-    *   **Stock Card:**
-        *   Added a `variant` prop to control rendering mode.
-        *   Prevented clicks on buttons from triggering the modal dialog.
-        *   Simplified the sparklines for the sidebar version.
-    *   **StockDetailModal:**
-        *   Moved news indicators from sparklines to the main chart.
-        *   Implemented tooltips for news indicators.
-    *   **Index Page:**
-        *   Adjusted layout to accommodate the new News Feed component and the new layout of the StockCards.
-        *   Added a scrollable area for the driver list.
+1. **Mid-Week** (`midweek`)
+   - Normal trading conditions
+   - 3% price volatility
+   - Standard trading volume
 
-    ## Code Modifications
+2. **Race Day** (`raceday`)
+   - High volatility trading
+   - 5% price swings
+   - Double trading volume
+   - Race-specific news events
 
-    *   Added `StockDetailModal.tsx` for the detailed stock view.
-    *   Added `NewsFeed.tsx` for the news feed display.
-    *   Modified `StockCard.tsx` to support different rendering modes and prevent event propagation.
-    *   Modified `Index.tsx` to include the new components and adjust the layout.
-    *   Updated `src/components/ui/scroll-area.tsx` to fix a `useState` error.
+3. **Post-Season** (`postseason`)
+   - Lower volatility
+   - 2% price swings
+   - Half trading volume
+   - Season wrap-up news
 
-    ## Getting Started
+## New Features
 
-    1. Clone the repository
-    2. Install dependencies:
-       ```bash
-       npm install
-       ```
-    3. Start the development server:
-       ```bash
-       npm run dev
-       ```
-    4. Open http://localhost:8080 in your browser
+*   **Stock Detail Modal:** Tapping a driver card now opens a modal dialog displaying a detailed stock chart, key performance metrics (P/E ratio, EPS), and relevant statistics (volume, market cap).
+*   **News Indicators:** News indicators are displayed as small circles along the bottom of the stock chart in the modal. Clicking on an indicator shows a tooltip with the headline and a link to the article.
+*   **News Feed:** A new "News Feed" component is added below the "League Standings" section, displaying the latest news headlines, summaries, and stock indicators with positive/negative impact.
+*   **Stock Card Variants:** The `StockCard` component now renders differently based on its location. In the left sidebar, it displays a smaller, less detailed version, while in the portfolio section, it displays the full, detailed version.
+*   **Scrollable Driver List:** The driver list is now scrollable, allowing users to see more drivers at once.
+*   **Layout Adjustments:** The driver list is now positioned to the left of the portfolio section and stretches the full height of the section. The League Standings section is now positioned below the Portfolio section.
 
-    ## Development Guidelines
+## Updated Functionalities
 
-    1. **Adding New Trading Strategies**
-       - Create a new class extending `BaseStrategy`
-       - Implement the `analyze` method
-       - Register the strategy in `leagueStore.ts`
+*   **Stock Card:**
+	*   Added a `variant` prop to control rendering mode.
+	*   Prevented clicks on buttons from triggering the modal dialog.
+	*   Simplified the sparklines for the sidebar version.
+*   **StockDetailModal:**
+	*   Moved news indicators from sparklines to the main chart.
+	*   Implemented tooltips for news indicators.
+*   **Index Page:**
+	*   Adjusted layout to accommodate the new News Feed component and the new layout of the StockCards.
+	*   Added a scrollable area for the driver list.
 
-    2. **Modifying Market Scenarios**
-       - Update scenario configurations in `stockData.ts`
-       - Adjust volatility and volume multipliers
-       - Add relevant news items
+## Code Modifications
 
-    3. **State Management Best Practices**
-       - Use appropriate store for related state
-       - Maintain immutability
-       - Follow Zustand patterns
+*   Added `StockDetailModal.tsx` for the detailed stock view.
+*   Added `NewsFeed.tsx` for the news feed display.
+*   Modified `StockCard.tsx` to support different rendering modes and prevent event propagation.
+*   Modified `Index.tsx` to include the new components and adjust the layout.
+*   Updated `src/components/ui/scroll-area.tsx` to fix a `useState` error.
 
-    ## Project Structure
+## Getting Started
 
-    ```
-    src/
-    ├── components/          # React components
-    │   ├── Header.tsx      # Main navigation and controls
-    │   ├── StockCard.tsx   # Individual stock display
-    │   ├── StockDetailModal.tsx # Modal for detailed stock view
-    │   ├── NewsFeed.tsx    # News feed component
-    │   └── ...
-    ├── store/              # State management
-    │   ├── stockStore.ts   # Market state
-    │   ├── leagueStore.ts  # AI traders
-    │   └── debugStore.ts   # Debug controls
-    ├── trading/            # Trading system
-    │   ├── strategies/     # Trading algorithms
-    │   └── analysis/       # Market analysis tools
-    └── utils/              # Utility functions
-        └── stockData.ts    # Market data generation
-    ```
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open http://localhost:8080 in your browser
 
-    ## Contributing
+## Development Guidelines
 
-    1. Fork the repository
-    2. Create a feature branch
-    3. Make your changes
-    4. Submit a pull request
+1. **Adding New Trading Strategies**
+   - Create a new class extending `BaseStrategy`
+   - Implement the `analyze` method
+   - Register the strategy in `leagueStore.ts`
 
-    ## License
+2. **Modifying Market Scenarios**
+   - Update scenario configurations in `stockData.ts`
+   - Adjust volatility and volume multipliers
+   - Add relevant news items
 
-    This project is licensed under the MIT License - see the LICENSE file for details.
-    ```
+3. **State Management Best Practices**
+   - Use appropriate store for related state
+   - Maintain immutability
+   - Follow Zustand patterns
+
+## Project Structure
+
+```
+src/
+├── components/          # React components
+│   ├── Header.tsx      # Main navigation and controls
+│   ├── StockCard.tsx   # Individual stock display
+│   ├── StockDetailModal.tsx # Modal for detailed stock view
+│   ├── NewsFeed.tsx    # News feed component
+│   └── ...
+├── store/              # State management
+│   ├── stockStore.ts   # Market state
+│   ├── leagueStore.ts  # AI traders
+│   └── debugStore.ts   # Debug controls
+├── trading/            # Trading system
+│   ├── strategies/     # Trading algorithms
+│   └── analysis/       # Market analysis tools
+└── utils/              # Utility functions
+	└── stockData.ts    # Market data generation
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
